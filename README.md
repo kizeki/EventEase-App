@@ -33,25 +33,6 @@ EventEase is a Blazor WebAssembly event discovery application. Users can browse 
 - Browser `localStorage` through JavaScript interop
 - GitHub Actions and GitHub Pages
 
-## Project Structure
-
-```text
-EventEase-App/
-├── EventEase-App.csproj
-├── App.razor
-├── Program.cs
-├── Layout/                  Shared application layout and navigation
-├── Models/                  Event, user, and paged-result models
-├── Pages/                   Homepage, event details, and not-found pages
-├── Services/                JSON data access and registration state
-├── wwwroot/
-│   ├── data/                events.json and users.json
-│   ├── css/                 Application styling
-│   └── js/                  Browser local-storage bridge
-├── EventEase-App.Tests/     xUnit unit tests
-└── .github/workflows/       GitHub Pages deployment workflow
-```
-
 ## Data Flow
 
 The application reads the complete mock dataset from:
