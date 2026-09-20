@@ -1,0 +1,65 @@
+name: Deploy Blazor WebAssembly to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish WebAssembly app
+        run: dotnet publish EventEase-App.csproj --configuration Release --output release
+
+      - name: Configure GitHub Pages base path
+        env:
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import shutil
+
+          index = Path("release/wwwroot/index.html")
+          content = index.read_text()
+          repository_name = os.environ["REPOSITORY_NAME"]
+          content = content.replace('<base href="/" />', f'<base href="/{repository_name}/" />')
+          index.write_text(content)
+          shutil.copyfile(index, index.with_name("404.html"))
+          index.with_name(".nojekyll").touch()
+          PY
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: release/wwwroot
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
