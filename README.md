@@ -31,3 +31,9 @@ The GitHub Actions workflow in `.github/workflows/deploy-pages.yml` publishes th
 The deployment URL is:
 
 https://kizeki.github.io/EventEase-App/
+
+## Registration Behavior
+
+Event registrations are stored in the browser's local storage. This preserves the registered user, selected events, attendee counts, and registration status after a refresh in the same browser.
+
+The app is a static GitHub Pages deployment, so registrations are not shared between browsers or devices and are cleared when the browser's site data is removed.

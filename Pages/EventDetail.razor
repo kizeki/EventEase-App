@@ -1,5 +1,6 @@
 @page "/events/{EventId:int}"
 @inject EventDataService EventData
+@inject RegistrationStateService RegistrationState
 
 <PageTitle>@(eventItem?.Name ?? "Event") | EventEase</PageTitle>
 
@@ -42,6 +43,9 @@ else
                     <span aria-hidden="true">✓</span>
                     You're on the list. See you there!
                 </div>
+                <button class="secondary-action" type="button" @onclick="CancelRegistration">
+                    Cancel registration
+                </button>
             }
             else
             {
@@ -77,6 +81,7 @@ else
     public int EventId { get; set; }
 
     private Event? eventItem;
+    private List<User> users = [];
     private List<User> attendees = [];
     private bool isAttending;
     private bool isLoading = true;
@@ -85,33 +90,63 @@ else
     protected override async Task OnParametersSetAsync()
     {
         var events = await EventData.GetEventsAsync();
-        var users = await EventData.GetUsersAsync();
+        users = (await EventData.GetUsersAsync()).ToList();
+        await RegistrationState.LoadAsync();
         eventItem = events.FirstOrDefault(item => item.Id == EventId);
-        attendees = eventItem is null
-            ? []
-            : users.Where(user => eventItem.Attendees.Contains(user.Id)).ToList();
+        registration = new RegistrationModel
+        {
+            Name = RegistrationState.State.User?.Name ?? string.Empty,
+            Email = RegistrationState.State.User?.Email ?? string.Empty
+        };
+        isAttending = eventItem is not null && RegistrationState.IsRegistered(EventId);
+        RefreshAttendees();
         isLoading = false;
     }
 
-    private void RegisterAttendee()
+    private async Task RegisterAttendee()
     {
         if (eventItem is null)
         {
             return;
         }
 
-        var nextId = attendees.Count == 0 ? 1 : attendees.Max(attendee => attendee.Id) + 1;
-        var attendee = new User
-        {
-            Id = nextId,
-            Name = registration.Name.Trim(),
-            Email = registration.Email.Trim(),
-            AvatarUrl = $"https://picsum.photos/seed/{Uri.EscapeDataString(registration.Name.Trim())}/96/96"
-        };
+        var email = registration.Email.Trim();
+        var attendee = users.FirstOrDefault(user => user.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
+            ?? new User
+            {
+                Id = -1,
+                Name = registration.Name.Trim(),
+                Email = email,
+                AvatarUrl = $"https://picsum.photos/seed/{Uri.EscapeDataString(registration.Name.Trim())}/96/96"
+            };
 
-        attendees.Add(attendee);
-        eventItem.Attendees.Add(attendee.Id);
-        isAttending = !isAttending;
+        attendee.Name = registration.Name.Trim();
+        await RegistrationState.RegisterAsync(attendee, EventId);
+        isAttending = true;
+        RefreshAttendees();
+    }
+
+    private async Task CancelRegistration()
+    {
+        await RegistrationState.UnregisterAsync(EventId);
+        isAttending = false;
+        RefreshAttendees();
+    }
+
+    private void RefreshAttendees()
+    {
+        if (eventItem is null)
+        {
+            attendees = [];
+            return;
+        }
+
+        attendees = users.Where(user => eventItem.Attendees.Contains(user.Id)).ToList();
+        var registeredUser = RegistrationState.State.User;
+        if (isAttending && registeredUser is not null && attendees.All(user => user.Id != registeredUser.Id))
+        {
+            attendees.Add(registeredUser);
+        }
     }
 
     private sealed class RegistrationModel

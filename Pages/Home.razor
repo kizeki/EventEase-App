@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject EventDataService EventData
+@inject RegistrationStateService RegistrationState
 
 <PageTitle>Discover events | EventEase</PageTitle>
 
@@ -38,6 +39,13 @@
 			}
 		</select>
 	</label>
+	<label class="filter-field">
+		<span>View</span>
+		<select @bind="viewFilter" aria-label="Filter by registration status">
+			<option value="all">All events</option>
+			<option value="registered">My events</option>
+		</select>
+	</label>
 </section>
 
 @if (events is null)
@@ -63,7 +71,7 @@ else
 		{
 			<a class="event-card" href="events/@eventItem.Id">
 				<div class="event-image-wrap">
-					<img src="@eventItem.ImageUrl" alt="" loading="lazy" />
+					<img src="@eventItem.ImageUrl" alt="@eventItem.Name" loading="lazy" />
 					<span class="event-date">@eventItem.Date.ToString("MMM") <strong>@eventItem.Date.Day</strong></span>
 				</div>
 				<div class="event-card-body">
@@ -71,7 +79,11 @@ else
 					<h2>@eventItem.Name</h2>
 					<p class="event-description">@eventItem.Description</p>
 					<div class="event-card-footer">
-						<span>@eventItem.Attendees.Count attendees</span>
+							<span>@GetAttendeeCount(eventItem) attendees</span>
+							@if (registeredEventIds.Contains(eventItem.Id))
+							{
+								<span class="registered-badge">You're going</span>
+							}
 						<span class="arrow" aria-hidden="true">↗</span>
 					</div>
 				</div>
@@ -85,6 +97,8 @@ else
 	private string searchTerm = string.Empty;
 	private string dateFilter = "all";
 	private string locationFilter = "all";
+	private string viewFilter = "all";
+	private HashSet<int> registeredEventIds = [];
 
 	private IReadOnlyList<string> locations => events?
 		.Select(eventItem => eventItem.Location)
@@ -96,12 +110,22 @@ else
 		.Where(MatchesSearch)
 		.Where(MatchesDate)
 		.Where(eventItem => locationFilter == "all" || eventItem.Location == locationFilter)
+		.Where(eventItem => viewFilter != "registered" || registeredEventIds.Contains(eventItem.Id))
 		.OrderBy(eventItem => eventItem.Date)
 		.ToList() ?? [];
 
 	protected override async Task OnInitializedAsync()
 	{
+		await RegistrationState.LoadAsync();
 		events = (await EventData.GetEventsAsync()).ToList();
+		registeredEventIds = RegistrationState.State.RegisteredEventIds;
+	}
+
+	private int GetAttendeeCount(Event eventItem)
+	{
+		var localUser = RegistrationState.State.User;
+		var localUserAlreadyIncluded = localUser is not null && eventItem.Attendees.Contains(localUser.Id);
+		return eventItem.Attendees.Count + (registeredEventIds.Contains(eventItem.Id) && !localUserAlreadyIncluded ? 1 : 0);
 	}
 
 	private bool MatchesSearch(Event eventItem)
