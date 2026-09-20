@@ -130,6 +130,17 @@ body { background: #fff; color: var(--ink); }
 .attendee-section { border-top-color: var(--line); }
 .primary-action { background: var(--accent); border-radius: .5rem; }
 .primary-action:hover { background: var(--accent-dark); }
+.registration-panel { border-top: 1px solid var(--line); margin-top: 2rem; padding-top: 1.5rem; }
+.registration-panel h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.55rem; letter-spacing: -.04em; margin: .35rem 0 1.25rem; }
+.registration-fields { display: grid; gap: .75rem; margin-bottom: 1rem; }
+.registration-fields label { display: flex; flex-direction: column; gap: .35rem; }
+.registration-fields label > span { color: var(--muted); font-size: .72rem; font-weight: 600; }
+.registration-fields input { border: 1px solid var(--line); border-radius: .4rem; color: var(--ink); font: inherit; outline: 0; padding: .7rem .75rem; width: 100%; }
+.registration-fields input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--highlight); }
+.registration-fields input.invalid { border-color: #c34d4d; }
+.validation-message { color: #b23d3d; font-size: .7rem; }
+.registration-success { align-items: center; background: var(--highlight); border: 1px solid #cce7e9; border-radius: .5rem; color: var(--accent-dark); display: flex; font-weight: 600; gap: .65rem; margin-top: 2rem; padding: 1rem; }
+.registration-success span { align-items: center; background: var(--accent); border-radius: 50%; color: #fff; display: inline-flex; height: 1.35rem; justify-content: center; width: 1.35rem; }
 .not-found-page { align-items: flex-start; display: flex; flex-direction: column; margin: 0 auto; max-width: 720px; padding: 8rem 0; }
 .not-found-icon { align-items: center; background: var(--highlight); border-radius: 50%; color: var(--accent); display: flex; font-size: 1.7rem; height: 4.25rem; justify-content: center; margin-bottom: 2.25rem; transform: rotate(-45deg); width: 4.25rem; }
 .not-found-page h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(3rem, 7vw, 6rem); font-weight: 600; letter-spacing: -.07em; line-height: .95; margin: 0; }
