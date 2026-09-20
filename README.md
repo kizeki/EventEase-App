@@ -24,6 +24,8 @@ The development server displays the local URL in the terminal.
 dotnet build EventEase-App.csproj --configuration Release
 ```
 
+The event and user JSON files contain the complete mock dataset: 350 events and 250 users. The data service reads these files and applies filtering and pagination through its data-access methods.
+
 ## Deployment
 
 The GitHub Actions workflow in `.github/workflows/deploy-pages.yml` publishes the WebAssembly app and deploys it to GitHub Pages whenever changes are pushed to `main`.

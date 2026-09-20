@@ -19,11 +19,11 @@
 <section class="events-toolbar" aria-label="Event filters">
 	<div class="search-field">
 		<span aria-hidden="true">⌕</span>
-		<input @bind="searchTerm" @bind:event="oninput" placeholder="Search events, places, ideas..." aria-label="Search events" />
+		<input @bind="searchTerm" @bind:event="oninput" @bind:after="LoadFirstPageAsync" placeholder="Search events, places, ideas..." aria-label="Search events" />
 	</div>
 	<label class="filter-field">
 		<span>Date</span>
-		<select @bind="dateFilter" aria-label="Filter by date">
+		<select @bind="dateFilter" @bind:after="LoadFirstPageAsync" aria-label="Filter by date">
 			<option value="all">All dates</option>
 			<option value="this-month">This month</option>
 			<option value="next-month">Next month</option>
@@ -31,7 +31,7 @@
 	</label>
 	<label class="filter-field">
 		<span>Location</span>
-		<select @bind="locationFilter" aria-label="Filter by location">
+		<select @bind="locationFilter" @bind:after="LoadFirstPageAsync" aria-label="Filter by location">
 			<option value="all">All locations</option>
 			@foreach (var location in locations)
 			{
@@ -41,7 +41,7 @@
 	</label>
 	<label class="filter-field">
 		<span>View</span>
-		<select @bind="viewFilter" aria-label="Filter by registration status">
+		<select @bind="viewFilter" @bind:after="LoadFirstPageAsync" aria-label="Filter by registration status">
 			<option value="all">All events</option>
 			<option value="registered">My events</option>
 		</select>
@@ -52,7 +52,7 @@
 {
 	<div class="loading-state">Gathering the good stuff...</div>
 }
-else if (filteredEvents.Count == 0)
+else if (events.Count == 0)
 {
 	<div class="empty-state">
 		<span class="empty-icon">◌</span>
@@ -63,11 +63,11 @@ else if (filteredEvents.Count == 0)
 else
 {
 	<div class="results-heading">
-		<p><strong>@filteredEvents.Count.ToString("00")</strong> events to explore</p>
+		<p><strong>@totalEventCount.ToString("00")</strong> events to explore</p>
 		<span>Sorted by date</span>
 	</div>
 	<div class="event-grid">
-		@foreach (var eventItem in filteredEvents)
+		@foreach (var eventItem in events)
 		{
 			<a class="event-card" href="events/@eventItem.Id">
 				<div class="event-image-wrap">
@@ -90,35 +90,35 @@ else
 			</a>
 		}
 	</div>
+	@if (hasMoreEvents)
+	{
+		<div class="load-more-wrap">
+			<button class="load-more-button" type="button" @onclick="LoadMoreAsync">
+				Load more <span>@(totalEventCount - events.Count) remaining</span>
+			</button>
+		</div>
+	}
 }
 
 @code {
 	private List<Event>? events;
+	private IReadOnlyList<string> locations = [];
+	private int totalEventCount;
+	private bool hasMoreEvents;
 	private string searchTerm = string.Empty;
 	private string dateFilter = "all";
 	private string locationFilter = "all";
 	private string viewFilter = "all";
 	private HashSet<int> registeredEventIds = [];
-
-	private IReadOnlyList<string> locations => events?
-		.Select(eventItem => eventItem.Location)
-		.Distinct()
-		.OrderBy(location => location)
-		.ToList() ?? [];
-
-	private List<Event> filteredEvents => events?
-		.Where(MatchesSearch)
-		.Where(MatchesDate)
-		.Where(eventItem => locationFilter == "all" || eventItem.Location == locationFilter)
-		.Where(eventItem => viewFilter != "registered" || registeredEventIds.Contains(eventItem.Id))
-		.OrderBy(eventItem => eventItem.Date)
-		.ToList() ?? [];
+	private const int PageSize = 12;
+	private int currentPage;
 
 	protected override async Task OnInitializedAsync()
 	{
 		await RegistrationState.LoadAsync();
-		events = (await EventData.GetEventsAsync()).ToList();
 		registeredEventIds = RegistrationState.State.RegisteredEventIds;
+		locations = await EventData.GetLocationsAsync();
+		await LoadFirstPageAsync();
 	}
 
 	private int GetAttendeeCount(Event eventItem)
@@ -128,28 +128,42 @@ else
 		return eventItem.Attendees.Count + (registeredEventIds.Contains(eventItem.Id) && !localUserAlreadyIncluded ? 1 : 0);
 	}
 
-	private bool MatchesSearch(Event eventItem)
+	private async Task LoadFirstPageAsync()
 	{
-		if (string.IsNullOrWhiteSpace(searchTerm))
-		{
-			return true;
-		}
-
-		var search = searchTerm.Trim();
-		return eventItem.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
-			|| eventItem.Location.Contains(search, StringComparison.OrdinalIgnoreCase)
-			|| eventItem.Description.Contains(search, StringComparison.OrdinalIgnoreCase)
-			|| eventItem.Date.ToString("MMMM d, yyyy").Contains(search, StringComparison.OrdinalIgnoreCase);
+		currentPage = 1;
+		await LoadPageAsync(false);
 	}
 
-	private bool MatchesDate(Event eventItem)
+	private async Task LoadMoreAsync()
 	{
-		var today = DateTime.Today;
-		return dateFilter switch
+		if (!hasMoreEvents)
 		{
-			"this-month" => eventItem.Date.Year == today.Year && eventItem.Date.Month == today.Month,
-			"next-month" => eventItem.Date.Year == today.AddMonths(1).Year && eventItem.Date.Month == today.AddMonths(1).Month,
-			_ => true
-		};
+			return;
+		}
+
+		currentPage++;
+		await LoadPageAsync(true);
+	}
+
+	private async Task LoadPageAsync(bool append)
+	{
+		var page = await EventData.GetEventsPageAsync(
+			currentPage,
+			PageSize,
+			searchTerm,
+			dateFilter,
+			locationFilter,
+			viewFilter,
+			registeredEventIds);
+		totalEventCount = page.TotalCount;
+		hasMoreEvents = page.HasMore;
+		if (append)
+		{
+			events!.AddRange(page.Items);
+		}
+		else
+		{
+			events = page.Items.ToList();
+		}
 	}
 }

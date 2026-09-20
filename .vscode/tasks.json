@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "start EventEase-App",
+            "type": "process",
+            "command": "dotnet",
+            "dependsOn": "stop EventEase-App",
+            "dependsOrder": "sequence",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/EventEase-App.csproj",
+                "--launch-profile",
+                "http",
+                "--no-restore",
+                "--configuration",
+                "Debug"
+            ],
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "eventease",
+                "pattern": {
+                    "regexp": ".*"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*",
+                    "endsPattern": "Now listening on: http://localhost:5140"
+                }
+            }
+        },
+        {
+            "label": "stop EventEase-App",
+            "type": "process",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-Command",
+                "$projectProcesses = Get-CimInstance Win32_Process -Filter \"Name = 'dotnet.exe'\" | Where-Object { $_.CommandLine -like '*EventEase-App.csproj*' }; $projectProcesses | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; $connections = Get-NetTCPConnection -LocalPort 5140 -State Listen -ErrorAction SilentlyContinue; $connections | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}

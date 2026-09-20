@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Blazor: Debug EventEase-App",
+            "type": "blazorwasm",
+            "request": "launch",
+            "url": "http://localhost:5140",
+            "browser": "chrome",
+            "cwd": "${workspaceFolder}",
+            "timeout": 60000,
+            "preLaunchTask": "start EventEase-App"
+        }
+    ]
+}
