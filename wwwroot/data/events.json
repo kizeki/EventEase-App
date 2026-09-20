@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "name": "Harbor Lights Festival",
+    "description": "An evening of live music, local food, and lantern installations along the waterfront.",
+    "date": "2026-10-03T18:30:00",
+    "location": "Pier 7, Seattle",
+    "imageUrl": "https://picsum.photos/seed/harbor-lights/900/600",
+    "attendees": [1, 2, 4]
+  },
+  {
+    "id": 2,
+    "name": "Future Makers Summit",
+    "description": "A hands-on gathering for builders exploring responsible technology, design, and entrepreneurship.",
+    "date": "2026-10-17T09:00:00",
+    "location": "Innovation Hall, Austin",
+    "imageUrl": "https://picsum.photos/seed/future-makers/900/600",
+    "attendees": [2, 3, 5, 6]
+  },
+  {
+    "id": 3,
+    "name": "Autumn Table Supper",
+    "description": "A long-table dinner celebrating seasonal ingredients from independent farms and makers.",
+    "date": "2026-11-06T19:00:00",
+    "location": "The Glasshouse, Portland",
+    "imageUrl": "https://picsum.photos/seed/autumn-table/900/600",
+    "attendees": [1, 3, 7]
+  },
+  {
+    "id": 4,
+    "name": "City Sketch Walk",
+    "description": "A relaxed guided sketching walk through historic streets, courtyards, and hidden gardens.",
+    "date": "2026-11-21T10:30:00",
+    "location": "Old Town Square, Chicago",
+    "imageUrl": "https://picsum.photos/seed/city-sketch/900/600",
+    "attendees": [4, 5, 8]
+  },
+  {
+    "id": 5,
+    "name": "Winter Film Night",
+    "description": "Independent short films, a filmmaker Q&A, and a late-night coffee bar under one roof.",
+    "date": "2026-12-12T20:00:00",
+    "location": "The Rialto, Denver",
+    "imageUrl": "https://picsum.photos/seed/winter-film/900/600",
+    "attendees": [2, 6, 8]
+  },
+  {
+    "id": 6,
+    "name": "New Year Design Lab",
+    "description": "A practical half-day workshop for turning ambitious ideas into clear, useful experiences.",
+    "date": "2027-01-09T13:00:00",
+    "location": "Studio North, Brooklyn",
+    "imageUrl": "https://picsum.photos/seed/design-lab/900/600",
+    "attendees": [1, 4, 6, 7]
+  }
+]

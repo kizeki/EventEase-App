@@ -1,0 +1,10 @@
+[
+  { "id": 1, "name": "Maya Chen", "email": "maya@example.com", "avatarUrl": "https://picsum.photos/seed/maya/96/96" },
+  { "id": 2, "name": "Jordan Ellis", "email": "jordan@example.com", "avatarUrl": "https://picsum.photos/seed/jordan/96/96" },
+  { "id": 3, "name": "Avery Morgan", "email": "avery@example.com", "avatarUrl": "https://picsum.photos/seed/avery/96/96" },
+  { "id": 4, "name": "Sam Rivera", "email": "sam@example.com", "avatarUrl": "https://picsum.photos/seed/sam/96/96" },
+  { "id": 5, "name": "Taylor Brooks", "email": "taylor@example.com", "avatarUrl": "https://picsum.photos/seed/taylor/96/96" },
+  { "id": 6, "name": "Riley Stone", "email": "riley@example.com", "avatarUrl": "https://picsum.photos/seed/riley/96/96" },
+  { "id": 7, "name": "Casey Park", "email": "casey@example.com", "avatarUrl": "https://picsum.photos/seed/casey/96/96" },
+  { "id": 8, "name": "Jamie Bell", "email": "jamie@example.com", "avatarUrl": "https://picsum.photos/seed/jamie/96/96" }
+]

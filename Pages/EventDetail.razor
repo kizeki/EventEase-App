@@ -1,0 +1,70 @@
+@page "/events/{EventId:int}"
+@inject EventDataService EventData
+
+<PageTitle>@(eventItem?.Name ?? "Event") | EventEase</PageTitle>
+
+@if (isLoading)
+{
+    <div class="loading-state">Finding this event...</div>
+}
+else if (eventItem is null)
+{
+    <NotFound />
+}
+else
+{
+    <a class="back-link" href="/">← Back to all events</a>
+    <article class="event-detail">
+        <div class="detail-image-wrap">
+            <img src="@eventItem.ImageUrl" alt="" />
+            <span class="detail-date">@eventItem.Date.ToString("dddd, MMMM d, yyyy")</span>
+        </div>
+        <div class="detail-content">
+            <p class="eyebrow">EVENT @eventItem.Id.ToString("00")</p>
+            <h1>@eventItem.Name</h1>
+            <p class="detail-location">◎ @eventItem.Location</p>
+            <p class="detail-description">@eventItem.Description</p>
+            <div class="attendee-section">
+                <div>
+                    <p class="section-label">Going</p>
+                    <p class="attendee-count">@attendees.Count attendees</p>
+                </div>
+                <div class="avatar-stack" aria-label="Event attendees">
+                    @foreach (var attendee in attendees.Take(6))
+                    {
+                        <img src="@attendee.AvatarUrl" alt="@attendee.Name" title="@attendee.Name" />
+                    }
+                </div>
+            </div>
+            <button class="primary-action" type="button" @onclick="ToggleAttendance">
+                @(isAttending ? "You're on the list" : "Count me in") <span>@(isAttending ? "✓" : "↗")</span>
+            </button>
+        </div>
+    </article>
+}
+
+@code {
+    [Parameter]
+    public int EventId { get; set; }
+
+    private Event? eventItem;
+    private List<User> attendees = [];
+    private bool isAttending;
+    private bool isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var events = await EventData.GetEventsAsync();
+        var users = await EventData.GetUsersAsync();
+        eventItem = events.FirstOrDefault(item => item.Id == EventId);
+        attendees = eventItem is null
+            ? []
+            : users.Where(user => eventItem.Attendees.Contains(user.Id)).ToList();
+        isLoading = false;
+    }
+
+    private void ToggleAttendance()
+    {
+        isAttending = !isAttending;
+    }
+}

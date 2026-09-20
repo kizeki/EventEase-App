@@ -1,7 +1,131 @@
 ﻿@page "/"
+@inject EventDataService EventData
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Discover events | EventEase</PageTitle>
 
-<h1>Hello, world!</h1>
+<section class="events-hero">
+	<div>
+		<p class="eyebrow">MAKE ROOM FOR SOMETHING GOOD</p>
+		<h1>Find your next <em>favorite</em> gathering.</h1>
+		<p class="hero-copy">A considered list of talks, dinners, walks, and nights worth leaving the house for.</p>
+	</div>
+	<div class="hero-note">
+		<span class="hero-note-mark">✦</span>
+		<span>Curated for curious people<br />in every kind of city.</span>
+	</div>
+</section>
 
-Welcome to your new app.
+<section class="events-toolbar" aria-label="Event filters">
+	<div class="search-field">
+		<span aria-hidden="true">⌕</span>
+		<input @bind="searchTerm" @bind:event="oninput" placeholder="Search events, places, ideas..." aria-label="Search events" />
+	</div>
+	<label class="filter-field">
+		<span>Date</span>
+		<select @bind="dateFilter" aria-label="Filter by date">
+			<option value="all">All dates</option>
+			<option value="this-month">This month</option>
+			<option value="next-month">Next month</option>
+		</select>
+	</label>
+	<label class="filter-field">
+		<span>Location</span>
+		<select @bind="locationFilter" aria-label="Filter by location">
+			<option value="all">All locations</option>
+			@foreach (var location in locations)
+			{
+				<option value="@location">@location</option>
+			}
+		</select>
+	</label>
+</section>
+
+@if (events is null)
+{
+	<div class="loading-state">Gathering the good stuff...</div>
+}
+else if (filteredEvents.Count == 0)
+{
+	<div class="empty-state">
+		<span class="empty-icon">◌</span>
+		<h2>No events found</h2>
+		<p>Try another search or clear one of the filters.</p>
+	</div>
+}
+else
+{
+	<div class="results-heading">
+		<p><strong>@filteredEvents.Count.ToString("00")</strong> events to explore</p>
+		<span>Sorted by date</span>
+	</div>
+	<div class="event-grid">
+		@foreach (var eventItem in filteredEvents)
+		{
+			<a class="event-card" href="events/@eventItem.Id">
+				<div class="event-image-wrap">
+					<img src="@eventItem.ImageUrl" alt="" loading="lazy" />
+					<span class="event-date">@eventItem.Date.ToString("MMM") <strong>@eventItem.Date.Day</strong></span>
+				</div>
+				<div class="event-card-body">
+					<p class="event-location">@eventItem.Location</p>
+					<h2>@eventItem.Name</h2>
+					<p class="event-description">@eventItem.Description</p>
+					<div class="event-card-footer">
+						<span>@eventItem.Attendees.Count attendees</span>
+						<span class="arrow" aria-hidden="true">↗</span>
+					</div>
+				</div>
+			</a>
+		}
+	</div>
+}
+
+@code {
+	private List<Event>? events;
+	private string searchTerm = string.Empty;
+	private string dateFilter = "all";
+	private string locationFilter = "all";
+
+	private IReadOnlyList<string> locations => events?
+		.Select(eventItem => eventItem.Location)
+		.Distinct()
+		.OrderBy(location => location)
+		.ToList() ?? [];
+
+	private List<Event> filteredEvents => events?
+		.Where(MatchesSearch)
+		.Where(MatchesDate)
+		.Where(eventItem => locationFilter == "all" || eventItem.Location == locationFilter)
+		.OrderBy(eventItem => eventItem.Date)
+		.ToList() ?? [];
+
+	protected override async Task OnInitializedAsync()
+	{
+		events = (await EventData.GetEventsAsync()).ToList();
+	}
+
+	private bool MatchesSearch(Event eventItem)
+	{
+		if (string.IsNullOrWhiteSpace(searchTerm))
+		{
+			return true;
+		}
+
+		var search = searchTerm.Trim();
+		return eventItem.Name.Contains(search, StringComparison.OrdinalIgnoreCase)
+			|| eventItem.Location.Contains(search, StringComparison.OrdinalIgnoreCase)
+			|| eventItem.Description.Contains(search, StringComparison.OrdinalIgnoreCase)
+			|| eventItem.Date.ToString("MMMM d, yyyy").Contains(search, StringComparison.OrdinalIgnoreCase);
+	}
+
+	private bool MatchesDate(Event eventItem)
+	{
+		var today = DateTime.Today;
+		return dateFilter switch
+		{
+			"this-month" => eventItem.Date.Year == today.Year && eventItem.Date.Month == today.Month,
+			"next-month" => eventItem.Date.Year == today.AddMonths(1).Year && eventItem.Date.Month == today.AddMonths(1).Month,
+			_ => true
+		};
+	}
+}
