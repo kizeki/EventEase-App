@@ -49,28 +49,7 @@ else
             }
             else
             {
-                <section class="registration-panel" aria-labelledby="registration-heading">
-                    <p class="section-label">Join this event</p>
-                    <h2 id="registration-heading">Save your spot.</h2>
-                    <EditForm Model="registration" OnValidSubmit="RegisterAttendee">
-                        <DataAnnotationsValidator />
-                        <div class="registration-fields">
-                            <label>
-                                <span>Name</span>
-                                <InputText @bind-Value="registration.Name" autocomplete="name" placeholder="Your name" />
-                                <ValidationMessage For="@(() => registration.Name)" />
-                            </label>
-                            <label>
-                                <span>Email</span>
-                                <InputText @bind-Value="registration.Email" autocomplete="email" placeholder="you@example.com" type="email" />
-                                <ValidationMessage For="@(() => registration.Email)" />
-                            </label>
-                        </div>
-                        <button class="primary-action" type="submit">
-                            Register for this event <span aria-hidden="true">↗</span>
-                        </button>
-                    </EditForm>
-                </section>
+				<RegistrationForm Model="registration" OnValidSubmit="RegisterAttendee" />
             }
         </div>
     </article>
@@ -149,14 +128,4 @@ else
         }
     }
 
-    private sealed class RegistrationModel
-    {
-        [Required(ErrorMessage = "Please enter your name.")]
-        [StringLength(80, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 80 characters.")]
-        public string Name { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Please enter your email.")]
-        [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
-        public string Email { get; set; } = string.Empty;
-    }
 }

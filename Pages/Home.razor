@@ -69,25 +69,9 @@ else
 	<div class="event-grid">
 		@foreach (var eventItem in events)
 		{
-			<a class="event-card" href="events/@eventItem.Id">
-				<div class="event-image-wrap">
-					<img src="@eventItem.ImageUrl" alt="@eventItem.Name" loading="lazy" />
-					<span class="event-date">@eventItem.Date.ToString("MMM") <strong>@eventItem.Date.Day</strong></span>
-				</div>
-				<div class="event-card-body">
-					<p class="event-location">@eventItem.Location</p>
-					<h2>@eventItem.Name</h2>
-					<p class="event-description">@eventItem.Description</p>
-					<div class="event-card-footer">
-							<span>@GetAttendeeCount(eventItem) attendees</span>
-							@if (registeredEventIds.Contains(eventItem.Id))
-							{
-								<span class="registered-badge">You're going</span>
-							}
-						<span class="arrow" aria-hidden="true">↗</span>
-					</div>
-				</div>
-			</a>
+			<EventCard EventItem="eventItem"
+					   AttendeeCount="@GetAttendeeCount(eventItem)"
+					   IsRegistered="@registeredEventIds.Contains(eventItem.Id)" />
 		}
 	</div>
 	@if (hasMoreEvents)

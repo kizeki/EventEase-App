@@ -1,0 +1,30 @@
+<a class="event-card" href="events/@EventItem.Id">
+    <div class="event-image-wrap">
+        <img src="@EventItem.ImageUrl" alt="@EventItem.Name" loading="lazy" />
+        <span class="event-date">@EventItem.Date.ToString("MMM") <strong>@EventItem.Date.Day</strong></span>
+    </div>
+    <div class="event-card-body">
+        <p class="event-location">@EventItem.Location</p>
+        <h2>@EventItem.Name</h2>
+        <p class="event-description">@EventItem.Description</p>
+        <div class="event-card-footer">
+            <span>@AttendeeCount attendees</span>
+            @if (IsRegistered)
+            {
+                <span class="registered-badge">You're going</span>
+            }
+            <span class="arrow" aria-hidden="true">↗</span>
+        </div>
+    </div>
+</a>
+
+@code {
+    [Parameter, EditorRequired]
+    public Event EventItem { get; set; } = new();
+
+    [Parameter]
+    public int AttendeeCount { get; set; }
+
+    [Parameter]
+    public bool IsRegistered { get; set; }
+}

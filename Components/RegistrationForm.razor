@@ -1,0 +1,35 @@
+<section class="registration-panel" aria-labelledby="registration-heading">
+    <p class="section-label">Join this event</p>
+    <h2 id="registration-heading">Save your spot.</h2>
+    <EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <div class="registration-fields">
+            <label>
+                <span>Name</span>
+                <InputText @bind-Value="Model.Name" autocomplete="name" placeholder="Your name" />
+                <ValidationMessage For="@(() => Model.Name)" />
+            </label>
+            <label>
+                <span>Email</span>
+                <InputText @bind-Value="Model.Email" autocomplete="email" placeholder="you@example.com" type="email" />
+                <ValidationMessage For="@(() => Model.Email)" />
+            </label>
+        </div>
+        <button class="primary-action" type="submit">
+            Register for this event <span aria-hidden="true">↗</span>
+        </button>
+    </EditForm>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public RegistrationModel Model { get; set; } = new();
+
+    [Parameter, EditorRequired]
+    public EventCallback OnValidSubmit { get; set; }
+
+    private Task HandleValidSubmit()
+    {
+        return OnValidSubmit.InvokeAsync();
+    }
+}
